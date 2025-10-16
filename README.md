@@ -2,7 +2,7 @@
 
 # 🛰️ ponte-telegram-discord
 
-### _Bridge Telegram → Discord + Heartbeat Monitor em Google Apps Script, com configuração segura e zero segredos em código._
+### _Bridge Telegram → Discord + Monitor de Heartbeat em Google Apps Script, com configuração 100% via Script Properties (sem segredos no código)._
 
 ![Hero Gradient](https://singlecolorimage.com/get/229ED9/600x5)
 ![Hero Gradient](https://singlecolorimage.com/get/5865F2/600x5)
@@ -15,10 +15,9 @@
   <img src="https://i.redd.it/5zec9qw4ppy61.png" alt="Discord Logo" width="48"/>
 </p>
 
-![GAS](https://img.shields.io/badge/Google%20Apps%20Script-powered-informational?logo=google)
-![Telegram API](https://img.shields.io/badge/Telegram%20Bot%20API-v5-blue?logo=telegram)
-![Discord Webhook](https://img.shields.io/badge/Discord%20Webhook-integrated-blurple?logo=discord)
-![Status](https://img.shields.io/badge/status-stable-brightgreen)
+<img src="https://img.shields.io/badge/Google%20Apps%20Script-V8-informational?logo=googleapps" />
+<img src="https://img.shields.io/badge/Telegram%20Bot%20API-integrated-blue?logo=telegram" />
+<img src="https://img.shields.io/badge/Discord%20Webhook-supported-5865F2?logo=discord" />
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 </div>
@@ -70,28 +69,45 @@ Relay de mensagens do **Telegram → Discord** via polling + monitor de **heartb
 
 Todos os ajustes e segredos devem estar nas **Script Properties**:
 
-| Chave | Tipo | Exemplo / Observação |
+| Chave | Valor (exemplo) | Observações |
 |------|------|------------------------|
-| `SECRET` | string | Segredo usado por `doPost()` |
-| `HEARTBEAT_TTL_SEC` | number | `90` |
-| `ALERT_COOLDOWN_MIN` | number | `10` |
-| `BOT_USERNAME` | string | `ChatApp Status Bot` |
-| `BOT_AVATAR_URL` | string | URL do avatar |
-| `STORE_NS` | string | `CHATAPP_HEARTBEATS` |
-| `WEBHOOK_MAP` | JSON | `{"chatapp-prod-01": "https://discord.com/api/webhooks/..."}` |
-| `TG_ENABLED` | boolean | `true` |
-| `TG_BOT_TOKEN` | string | Token do bot Telegram |
-| `TG_FORWARD_TO_APP_ID` | string | `chatapp-prod-01` |
-| `TG_CHAT_WHITELIST` | JSON array | `[]` ou lista de IDs |
-| `TG_IGNORE_SERVICE_MSGS` | boolean | `true` |
+| `SECRET` | `sua-super-secret` | Verificada no doPost |
+| `HEARTBEAT_TTL_SEC` | `90` | Segundos para considerar offline |
+| `ALERT_COOLDOWN_MIN` | `10` | Minutos entre alertas offline |
+| `BOT_USERNAME` | `ChatApp Status Bot` | Opcional |
+| `BOT_AVATAR_URL` | `(URL ou vazio)` | Opcional |
+| `STORE_NS` | `CHATAPP_HEARTBEATS` | Prefixo de storage |
+| `WEBHOOK_MAP` | `{"chatapp-prod-01":"https://discord.com/api/webhooks/XXX"}` | JSON app_id → webhook |
+| `TG_ENABLED` | `true` | true/false |
+| `TG_BOT_TOKEN` | `123456:ABCDEF...` | Token do @BotFather |
+| `TG_FORWARD_TO_APP_ID` | `chatapp-prod-01` | Chave existente no WEBHOOK_MAP |
+| `TG_CHAT_WHITELIST` | `[]` | Ex.: `["123456789","@meucanal"]` |
+| `TG_IGNORE_SERVICE_MSGS` | `true` | Ignora mensagens de serviço |
+> 💡 **Dica:** após alterar Script Properties, execute `reloadConfig()` ou qualquer função para recarregar CONFIG.
+
 
 ### `.env` (scripts locais — opcional)
 
 ```dotenv
-SCRIPT_ID=coloque_o_seu
-GOOGLE_CLIENT_ID=coloque_o_seu
-GOOGLE_CLIENT_SECRET=coloque_o_seu
+# Usado APENAS em scripts locais (ex.: push via API)
+SCRIPT_ID=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Nunca commitar segredos reais
 ```
+
+## 🧠 Como funciona (resumo técnico)
+
+- `CONFIG = Env.config()` lê Script Properties
+- `Env.assertRequired` valida chaves mínimas
+- `Store` usa Script Properties para persistir estado:
+  - Último heartbeat
+  - Flags de alerta
+  - Offset do Telegram
+- `discord.gs` monta payload/embeds
+- `telegram.gs` faz polling com `getUpdates`
+- `monitorHeartbeats()` verifica `now - last_heartbeat_ms` e dispara alerta se exceder `HEARTBEAT_TTL_SEC` (respeitando `ALERT_COOLDOWN_MIN`)
+
 
 ## 🚀 Deploy / Execução
 
@@ -160,11 +176,11 @@ curl -X POST "$WEB_APP_URL" -H "Content-Type: application/json" -d '{
 
 ```
 Google Apps Script
-├─ telegram.gs (polling)
-├─ discord.gs (webhook embed)
-├─ state.gs (storage via Script Properties)
-├─ Code.gs (handlers)
-└─ monitorHeartbeats()
+├─ state.gs (Env: leitura de Script Properties; Store: storage em Script Properties)
+├─ discord.gs (payload de embed + envio via webhook do Discord)
+├─ telegram.gs (polling getUpdates, whitelist, filtros, forward)
+├─ Code.gs (CONFIG via Env, doGet/doPost, monitorHeartbeats(), utils)
+└─ appsscript.json (opcional: manifest com timezone/runtime)
 ```
 
 ## 🔐 Segurança
@@ -183,12 +199,12 @@ Google Apps Script
 
 ## 🛠 Troubleshooting
 
-| Problema | Causa |
-|----------|-------|
-| 401 Unauthorized | `SECRET` ausente ou incorreta |
-| Polling não responde | `TG_BOT_TOKEN` errado ou `TG_ENABLED=false` |
-| Nada no Discord | Verifique `WEBHOOK_MAP` e `app_id` usado |
-| Webhook ativo no bot | Execute `tgDeleteWebhook()` |
+| Erro / Sintoma | Possível causa |
+|----------------|----------------|
+| `401 unauthorized` | `SECRET` inválida ou ausente |
+| Polling não roda | `TG_ENABLED` falso, token incorreto ou gatilho ausente |
+| Nada chega no Discord | `WEBHOOK_MAP` inválido ou `app_id` não existe |
+| Alerta OFFLINE nunca dispara | Gatilho de `monitorHeartbeats()` ausente ou TTL alto |
 
 ## 🤝 Contribuição
 
@@ -211,7 +227,7 @@ Distribuído sob licença [MIT](LICENSE).
 
 <div align="center">
 
-Google Apps Script  
-[📚 Telegram Bot API Docs](https://core.telegram.org/bots/api) ・ [📘 Discord Webhook Docs](https://discord.com/developers/docs/resources/webhook)
+Desenvolvido por Davi Parma
+[📚 Telegram Bot API](https://core.telegram.org/bots/api) ・ [📘 Discord Webhook Docs](https://discord.com/developers/docs/resources/webhook)
 
 </div>
