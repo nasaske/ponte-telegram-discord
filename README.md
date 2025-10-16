@@ -15,9 +15,9 @@
   <img src="https://i.redd.it/5zec9qw4ppy61.png" alt="Discord Logo" width="48"/>
 </p>
 
-<img src="https://img.shields.io/badge/Google%20Apps%20Script-V8-informational?logo=googleapps" />
-<img src="https://img.shields.io/badge/Telegram%20Bot%20API-integrated-blue?logo=telegram" />
-<img src="https://img.shields.io/badge/Discord%20Webhook-supported-5865F2?logo=discord" />
+![Google Apps Script](https://img.shields.io/badge/Google%20Apps%20Script-V8-informational?logo=googleapps)
+![Telegram Bot API](https://img.shields.io/badge/Telegram%20Bot%20API-integrated-blue?logo=telegram)
+![Discord Webhook](https://img.shields.io/badge/Discord%20Webhook-supported-5865F2?logo=discord)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 </div>
