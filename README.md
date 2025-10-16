@@ -12,7 +12,7 @@
   &nbsp;&nbsp;&nbsp;&nbsp;
   <strong>✈️ → 🌀</strong>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Discord_logo_new.svg" alt="Discord Logo" width="48"/>
+  <img src="https://i.redd.it/5zec9qw4ppy61.png" alt="Discord Logo" width="48"/>
 </p>
 
 ![GAS](https://img.shields.io/badge/Google%20Apps%20Script-powered-informational?logo=google)
