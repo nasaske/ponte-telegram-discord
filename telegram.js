@@ -112,7 +112,7 @@ function tgDeleteWebhook() {
   console.log('deleteWebhook', r.getResponseCode(), r.getContentText());
 }
 
-// detecta msgs de serviço
+// detecta mensagens de serviço
 function isServiceMessage_(m) {
   return !!(m.new_chat_members || m.left_chat_member || m.new_chat_title || m.new_chat_photo ||
             m.delete_chat_photo || m.group_chat_created || m.supergroup_chat_created ||

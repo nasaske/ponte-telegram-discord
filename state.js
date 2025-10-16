@@ -1,6 +1,6 @@
 /**
  * state.gs — storage via Script Properties + Env (config centralizada)
- * Configure as Script Properties em: Project Settings → Script properties
+ * Configure as Script Properties em: Project Settings → Script props
  */
 const Store = (() => {
   const P = PropertiesService.getScriptProperties();

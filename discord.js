@@ -3,7 +3,7 @@
  */
 
 function makeDiscordPayload_({ content, embeds }) {
-  const cfg = CONFIG; // global
+  const cfg = CONFIG; 
   return {
     content: content || '',
     username: cfg.BOT_USERNAME || undefined,

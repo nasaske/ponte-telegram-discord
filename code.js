@@ -60,7 +60,7 @@ function handleHeartbeat_(body) {
   return json_(200, { ok:true, stored:{ app_id, ts: now } });
 }
 
-/** Message → manda conteúdo/embeds para o webhook do app/canal */
+/** Message → manda conteúdo e embeds para o webhook do app/canal */
 function handleMessage_(body) {
   const webhook = body.discord_webhook || (body.app_id ? CONFIG.WEBHOOK_MAP?.[body.app_id] : null);
   if (!webhook) return json_(400, { ok:false, error:'missing discord_webhook' });
