@@ -21,7 +21,8 @@
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 </div>
-## 📌 Visão Geral
+
+### 📌 Visão Geral
 
 Relay de mensagens do **Telegram → Discord** via polling + monitor de **heartbeats** com alertas de status *offline/online*, desenvolvido em Google Apps Script.
 
